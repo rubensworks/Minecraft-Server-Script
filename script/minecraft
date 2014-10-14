@@ -16,19 +16,16 @@
 
 # Settings start
 USERNAME="<username>"
-JMXPORT=<jmx port>
 
-SERVICE='forge_latest.zip'
+SERVICE='minecraft.jar'
 MCPATH="/home/$USERNAME/minecraft"
 BACKUPPATH="/home/$USERNAME/backup"
-CHECKSERVER="/home/$USERNAME/CheckServer"
-JMXPWFILE="<path to jmx password file>"
 CRASHLOG_DB_PATH='<path to dump crash logs>'
 JAVA_HOME="/usr/local/lib/jrockit"
 
-MEMORY_OPTS="-Xmx8G -Xms8G"
-JAVA_OPTIONS="-XX:FlightRecorderOptions=defaultrecording=true,disk=true,repository=/home/$USERNAME/jfr/,maxage=30m,settings=profile"
-JMX_OPTIONS="-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.port=$JMXPORT -Dcom.sun.management.jmxremote.password.file=$JMXPWFILE"
+MEMORY_OPTS="-Xmx2G -Xms2G"
+JAVA_OPTIONS=""
+JMX_OPTIONS=""
 
 INVOCATION="${JAVA_HOME}/bin/java ${MEMORY_OPTS} ${JAVA_OPTIONS} ${JMX_OPTIONS} -jar $SERVICE nogui"
 BACKUPARCHIVEPATH=$BACKUPPATH/archive
@@ -87,13 +84,6 @@ mc_start() {
 		else
 			echo "Could not start $SERVICE."
 		fi
-	fi
-}
-
-mc_startmonitor() {
-	if [ -z $CHECKSERVER ]; then
-		echo "started monitor"
-		/usr/bin/daemon --name=minecraft_checkserver -- $JAVA_HOME/bin/java -cp $CHECKSERVER CheckServer localhost $PORT
 	fi
 }
 
@@ -168,12 +158,6 @@ mc_stop() {
 	rm $MCPATH/screen.name
 }
 
-mc_stopmonitor() {
-	if [ -z $CHECKSERVER ]; then
-		/usr/bin/daemon --name=minecraft_checkserver --stop
-	fi
-}
-
 mc_backup() {
 	echo "Backing up minecraft world"
 
@@ -234,13 +218,9 @@ mc_dumpcrashlogs() {
 #Start-Stop here
 case "$1" in
   start)
-    if mc_start
-    then
-      mc_startmonitor
-    fi
+    mc_start
     ;;
   stop)
-    mc_stopmonitor
     mc_stop
     ;;
   restart)
